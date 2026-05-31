@@ -5,6 +5,7 @@ const timerSlots = Array.from(document.querySelectorAll("[data-slot='timer']"));
 const clickSound = document.getElementById("click-sound");
 const themeToggle = document.querySelector("[data-action='theme']");
 const setTimerButton = document.querySelector("[data-action='set-timer']");
+const pauseButton = document.querySelector("[data-action='pause']");
 
 const FOCUS_SECONDS = 25 * 60;
 const BREAK_SECONDS = 5 * 60;
@@ -66,6 +67,11 @@ function updateTimers() {
   });
 }
 
+function updatePauseButton() {
+  if (!pauseButton) return;
+  pauseButton.textContent = isPaused ? "RESUME" : "PAUSE";
+}
+
 function stopTimer() {
   if (timerId) {
     clearInterval(timerId);
@@ -77,6 +83,7 @@ function stopTimer() {
 function startTimer() {
   stopTimer();
   isPaused = false;
+  updatePauseButton();
   requestWakeLock();
   timerId = setInterval(() => {
     if (remaining <= 0) {
@@ -107,18 +114,22 @@ function handleTimerEnd() {
 function resetFocus() {
   currentMode = "focus";
   remaining = FOCUS_SECONDS;
+  isPaused = false;
+  updatePauseButton();
   updateTimers();
 }
 
 function pauseResume() {
-  if (!timerId) return;
   if (isPaused) {
     isPaused = false;
     startTimer();
+    updatePauseButton();
     return;
   }
+  if (!timerId) return;
   isPaused = true;
   stopTimer();
+  updatePauseButton();
 }
 
 document.addEventListener("click", (event) => {
